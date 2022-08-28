@@ -1,6 +1,7 @@
 outputs
 
 *ref.exr
+gray.jpg
 
 __pycache__
 .idea

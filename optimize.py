@@ -13,7 +13,7 @@ from config import *
 
 ref_seed = 0
 train_seed = 2563893771
-rerender_ref = True
+rerender_ref = False
 save_intermediate = True
 
 
@@ -24,25 +24,31 @@ def mse(ref_image, rendered_image):
 def get_integrator(integrator_properties, default):
     if integrator_properties is None:
         return default
-    return mi.ad.integrators.prb.PRBIntegrator(props=integrator_properties)
-
-    # return default
+    # return mi.ad.integrators.prb.PRBIntegrator(props=integrator_properties)
+    return mi.cuda_ad_rgb.PathIntegrator(props=integrator_properties)
 
 
 def load_or_render_ref(config):
     ref_image_name = config['ref']
     if rerender_ref or not os.path.isfile(ref_image_name):
-        print('[ ] Rendering reference image...')
+        spp = config['ref_spp']
+        print(f'[ ] Rendering reference image at {spp}spp...')
         ref_scene_name = config['ref_scene']
         ref_scene = mi.load_file(ref_scene_name)
+
+        print('*' * 80)
+        print(ref_scene)
+        print('*' * 80)
 
         ref_scene_params = config['ref_scene_params']
         integrator_properties = mi.Properties()
         integrator_properties['max_depth'] = ref_scene_params['max_depth']
         integrator_properties['rr_depth'] = ref_scene_params['rr_depth']
+        integrator_properties['samples_per_pass'] = 4
         integrator = get_integrator(integrator_properties, ref_scene.integrator())
+        print(integrator)
 
-        ref_image = integrator.render(ref_scene, seed=ref_seed, spp=512)
+        ref_image = integrator.render(ref_scene, seed=ref_seed, spp=spp)
         cv2.imwrite(ref_image_name, cv2.cvtColor(np.array(ref_image), cv2.COLOR_RGB2BGR))
         print(f'[+] Saved reference image: {ref_image_name}')
     return cv2.imread(ref_image_name, cv2.IMREAD_UNCHANGED)
@@ -76,6 +82,11 @@ def optimize_prb(config_name):
     params = mi.traverse(scene)
     param_keys = config['params']
 
+    print('*' * 80)
+    print(params)
+    print(type(scene.integrator()))
+    print('*' * 80)
+
     # opt = mi.ad.SGD(lr=10.0)
     opt = mi.ad.Adam(lr=0.05)
     for param_key in param_keys:
@@ -86,6 +97,7 @@ def optimize_prb(config_name):
     integrator_properties = mi.Properties()
     integrator_properties['max_depth'] = scene_params['max_depth']
     integrator_properties['rr_depth'] = scene_params['rr_depth']
+    integrator_properties['samples_per_pass'] = 4
     integrator = get_integrator(integrator_properties, scene.integrator())
 
     # train
