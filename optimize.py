@@ -24,8 +24,7 @@ def mse(ref_image, rendered_image):
 def get_integrator(integrator_properties, default):
     if integrator_properties is None:
         return default
-    # return mi.ad.integrators.prb.PRBIntegrator(props=integrator_properties)
-    return mi.cuda_ad_rgb.PathIntegrator(props=integrator_properties)
+    return mi.ad.integrators.prb.PRBIntegrator(props=integrator_properties)
 
 
 def load_or_render_ref(config):
@@ -67,6 +66,7 @@ def optimize_prb(config_name):
     config = CONFIGS[config_name]
     output_dir = join(OUTPUT_DIR, config_name)
     os.makedirs(output_dir, exist_ok=True)
+    metadata_filename = join(OUTPUT_DIR, config_name, 'metadata.csv')
 
     forward_spp = config.get('forward_spp', 32)
     backward_spp = config.get('backward_spp', 32)
@@ -140,16 +140,14 @@ def optimize_prb(config_name):
             output_dir = join(OUTPUT_DIR, config_name)
             fname = join(output_dir, '{:04d}.exr'.format(iter_i))
             cv2.imwrite(fname, cv2.cvtColor(np.array(image), cv2.COLOR_RGB2BGR))
+        save_info_csv(metadata_filename, **metadata)
 
         # Track the loss between the ref image and the rendered image
         print(f"Iteration {iter_i:03d}: loss = {loss[0]:6f}, took {time_all:.03f}s", end='\r')
 
-    print('\nOptimization complete.')
-    del integrator, opt
-
-    metadata_filename = join(OUTPUT_DIR, config_name, 'metadata.csv')
-    save_info_csv(metadata_filename, **metadata)
+    print('\n [+] Optimization complete.')
     print(f'[+] Saved run metadata to: {metadata_filename}')
+    del integrator, opt
 
     return metadata['loss'][-1], image, metadata
 

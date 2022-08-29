@@ -1,9 +1,8 @@
 import os
 from os.path import join, dirname, realpath
 
-RES_SCENE_DIR = realpath(join(dirname(__file__), 'scenes'))
-DIFF_SCENE_DIR = realpath(join(dirname(__file__), 'scenes'))
-OUTPUT_DIR = realpath(join(DIFF_SCENE_DIR, '../outputs'))
+SCENE_DIR = realpath(join(dirname(__file__), 'scenes'))
+OUTPUT_DIR = 'D:/OldNew/LuisaRender/record/mitsuba3-diff/outputs'
 
 CBOX_PARAM_NAMES = [
     'red.reflectance.value',
@@ -21,9 +20,9 @@ STAIRCASE_PARAM_NAMES = [
 
 CONFIGS = {
     'cbox-rgb': {
-        'scene': join(RES_SCENE_DIR, 'cbox/cbox-rgb-initial.xml'),
-        'ref_scene': join(RES_SCENE_DIR, 'cbox/cbox-rgb.xml'),
-        'ref': join(RES_SCENE_DIR, 'cbox/cbox-rgb-ref.exr'),
+        'scene': join(SCENE_DIR, 'cbox/cbox-rgb-initial.xml'),
+        'ref_scene': join(SCENE_DIR, 'cbox/cbox-rgb.xml'),
+        'ref': join(SCENE_DIR, 'cbox/cbox-rgb-ref.exr'),
         'params': CBOX_PARAM_NAMES,
         'scene_params': {
             'max_depth': 8,
@@ -39,9 +38,9 @@ CONFIGS = {
         'backward_spp': 32,
     },
     'staircase': {
-        'scene': join(RES_SCENE_DIR, 'staircase/scene-rgb-initial.xml'),
-        'ref_scene': join(RES_SCENE_DIR, 'staircase/scene-rgb.xml'),
-        'ref': join(RES_SCENE_DIR, 'staircase/scene-rgb-ref.exr'),
+        'scene': join(SCENE_DIR, 'staircase/scene-rgb-initial.xml'),
+        'ref_scene': join(SCENE_DIR, 'staircase/scene-rgb.xml'),
+        'ref': join(SCENE_DIR, 'staircase/scene-rgb-ref.exr'),
         'params': STAIRCASE_PARAM_NAMES,
         'scene_params': {
             'max_depth': 8,
@@ -51,9 +50,9 @@ CONFIGS = {
             'max_depth': 8,
             'rr_depth': 2,
         },
-        'max_iterations': 100,
+        'max_iterations': 1000,
         'ref_spp': 1024,
-        'forward_spp': 32,
-        'backward_spp': 32,
+        'forward_spp': 512,
+        'backward_spp': 512,
     },
 }
